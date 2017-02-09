@@ -2,6 +2,7 @@ import koa from 'koa';
 import config from './config';
 import http from 'http';
 import Router from "koa-router";
+import bodyPaser from 'koa-bodyparser';
 
 let router = new Router();
 router.post('/slack', async(ctx, next) => {
