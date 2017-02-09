@@ -14,7 +14,9 @@ let app = new koa();
 app.use(bodyPaser());
 app.use(router.routes())
   .use(router.allowedMethods());
-
+app.use(async(ctx) => {
+  ctx.body = 'hello world !';
+});
 const port = process.env.NODE_PORT;
 let server = http.createServer(app.callback());
 server.listen(port, () => {
