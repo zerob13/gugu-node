@@ -1,0 +1,24 @@
+{
+  "apps": [
+    {
+      "name": "gugu-node",
+      "script": "index.js",
+      "exec_mode": "cluster",
+      "instances": "2",
+      "watch": [
+        "app.js",
+        "config.js"
+      ],
+      "ignore_watch": [
+        "node_modules"
+      ],
+      "watch_options": {
+        "followSymlinks": false
+      },
+      "env": {
+        "NODE_ENV": "development",
+        "NODE_PORT": 4004
+      }
+    }
+  ]
+}
