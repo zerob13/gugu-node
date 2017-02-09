@@ -2,12 +2,21 @@ import koa from "koa";
 import http from "http";
 import Router from "koa-router";
 import bodyPaser from "koa-bodyparser";
-
+import config from './config';
+import {bindUser, printPaper} from './api';
+import uuid from 'uuid/v4';
+import moment from 'moment';
+let userID = '';
 let router = new Router();
+function getNowTime() {
+  return moment().format('YYYY-MM-DD HH:mm:ss');
+}
 router.post('/slack', async(ctx, next) => {
   await next();
   console.dir(ctx.request.body);
-  ctx.body = {'text': 'printed!' + ctx.request.body.toString()};
+  let content = ctx.request.body.user_name + ' says: ' + ctx.request.body.text.replace(ctx.request.body.trigger_word, '');
+  printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
+  ctx.body = {'text': 'printed!'};
 });
 
 let app = new koa();
@@ -35,8 +44,15 @@ app.use(async(ctx) => {
 
 const port = process.env.NODE_PORT;
 let server = http.createServer(app.callback());
+bindUser(config.ak, getNowTime(), config.deviceId, uuid()).then((res) => {
+    if (res.showapi_res_code == 1) {
+      userID = res.showapi_userid;
+      server.listen(port, () => {
+        console.log('gugu server on ' + port);
+        console.log(userID);
+      });
+    }
+  }
+);
 
-server.listen(port, () => {
-  console.log('gugu server on ' + port);
-});
 
