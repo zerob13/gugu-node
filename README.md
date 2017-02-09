@@ -9,4 +9,4 @@ I don't know what to do.
 
 1. copy config.js.example to config.js
 
-1. modify config.j
+1. modify config.js
