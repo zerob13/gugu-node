@@ -6,6 +6,8 @@ import config from './config';
 import {bindUser, printPaper} from './api';
 import uuid from 'uuid/v4';
 import moment from 'moment';
+import Jimp from 'jimp';
+
 let userID = '';
 let router = new Router();
 function getNowTime() {
@@ -15,8 +17,20 @@ router.post('/slack', async(ctx, next) => {
   await next();
   console.dir(ctx.request.body);
   let content = ctx.request.body.user_name + ' says: ' + ctx.request.body.text;
-  let result = await printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
-  ctx.body = {'text': 'print result: ' + result.showapi_res_error};
+  let result;
+  if (ctx.request.body.trigger_word == 'gu-_-pic') {
+    let url = ctx.request.body.text.replace('gu-_-pic', '');
+    console.log(url);
+    result = await Jimp.read(url).then((img) => {
+      img.resize(300, Jimp.AUTO);
+      img.greyscale();
+      return printPaper(config.ak, getNowTime(), Buffer.from(img.bitmap.data).toString('base64'), 'P', config.deviceId, userID);
+    });
+    ctx.body = {'text': 'print result: ' + result.showapi_res_error};
+  } else {
+    result = await printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
+    ctx.body = {'text': 'print result: ' + result.showapi_res_error};
+  }
 });
 
 let app = new koa();

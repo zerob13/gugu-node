@@ -20,13 +20,23 @@ export function printPaper(ak, timestamp, printcontent, type, memobirdID, userID
   if (type === 'T') {
     content = Buffer.from(iconvLite.encode(printcontent, 'gbk')).toString('base64');
   } else if (type === 'P') {
-    //TODO: convert image to base64
+    content = printcontent;
   }
-  let query = END_POINT + PRINT_PAPER + '?ak=' + ak + '&timestamp=' + timestamp
-    + '&printcontent=' + type + ':' + content + '&memobirdID=' + memobirdID + '&userID=' + userID;
-  console.log(encodeURI(query));
-  return fetch(encodeURI(query))
-    .then(res => res.json());
+  let query = END_POINT + PRINT_PAPER;
+  return fetch(query, {
+    method: 'POST',
+    body: JSON.stringify({
+      'ak': ak, 'timestamp': timestamp,
+      'printcontent': type + ':' + content,
+      'memobirdID': memobirdID,
+      'userID': userID
+    }),
+    headers: {'Content-Type': 'application/json'},
+  })
+    .then((res) => {
+      let re = res.json();
+      return re;
+    });
 
 }
 
