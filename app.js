@@ -14,7 +14,7 @@ function getNowTime() {
 router.post('/slack', async(ctx, next) => {
   await next();
   console.dir(ctx.request.body);
-  let content = ctx.request.body.user_name + ' says: ' + ctx.request.body.text.replace(ctx.request.body.trigger_word, '');
+  let content = ctx.request.body.user_name + ' says: ' + ctx.request.body.text;
   let result = await printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
   ctx.body = {'text': 'print result: ' + result.showapi_res_error};
 });
