@@ -6,9 +6,7 @@
       "exec_mode": "cluster",
       "instances": "2",
       "watch": [
-        "app.js",
-        "config.js",
-        "api.js"
+        "*.js"
       ],
       "ignore_watch": [
         "node_modules"

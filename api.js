@@ -37,6 +37,5 @@ export function printPaper(ak, timestamp, printcontent, type, memobirdID, userID
       let re = res.json();
       return re;
     });
-
 }
 

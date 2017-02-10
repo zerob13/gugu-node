@@ -40,3 +40,4 @@ bower_components/
 build/*
 exports/*.csv
 config.js
+temp.bmp

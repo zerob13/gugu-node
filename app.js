@@ -2,12 +2,15 @@ import koa from "koa";
 import http from "http";
 import Router from "koa-router";
 import bodyPaser from "koa-bodyparser";
-import config from './config';
-import {bindUser, printPaper} from './api';
-import uuid from 'uuid/v4';
-import moment from 'moment';
-import Jimp from 'jimp';
+import config from "./config";
+import {bindUser, printPaper} from "./api";
+import uuid from "uuid/v4";
+import moment from "moment";
+import Gm from "gm";
+import Jimp from "jimp";
+import {encode} from 'node-base64-image';
 
+let gm = Gm.subClass({imageMagick: true});
 let userID = '';
 let router = new Router();
 function getNowTime() {
@@ -17,21 +20,48 @@ router.post('/slack', async(ctx, next) => {
   await next();
   console.dir(ctx.request.body);
   let content = ctx.request.body.user_name + ' says: ' + ctx.request.body.text;
-  let result;
   if (ctx.request.body.trigger_word == 'gu-_-pic') {
     let url = ctx.request.body.text.replace('gu-_-pic', '');
     console.log(url);
-    result = await Jimp.read(url).then((img) => {
-      img.resize(300, Jimp.AUTO);
-      img.greyscale();
-      return printPaper(config.ak, getNowTime(), Buffer.from(img.bitmap.data).toString('base64'), 'P', config.deviceId, userID);
-    });
-    ctx.body = {'text': 'print result: ' + result.showapi_res_error};
-  } else {
-    result = await printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
+    Jimp.read(url)
+      .then(function (image) {
+        image.resize(300, Jimp.AUTO);
+        image.invert();
+        // image.greyscale();
+        // image.flip(false, true)
+        image.getBuffer(Jimp.AUTO, function (err, buffer) {
+          gm(buffer)
+            .compress('None')
+            .monochrome()
+            .write('./temp.bmp', function (err) {
+              encode('./temp.bmp', {
+                  string: true, local: true
+                },
+                function (err, respon) {
+                  console.log(respon);
+                  // printPaper(config.ak, getNowTime(), respon, 'P', config.deviceId, userID).then(res => {
+                  //   console.dir(res);
+                  // });
+                }
+              )
+            });
+          // .toBuffer('bmp', function (err, bf) {
+          // printPaper(config.ak, getNowTime(), bf.toString('base64'), 'P', config.deviceId, userID).then(res => {
+          //   console.dir(res);
+          // });
+          // });
+        });
+      });
+
+    ctx.body = {'text': 'print result: sent'};
+  }
+  else {
+    let result = await
+      printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
     ctx.body = {'text': 'print result: ' + result.showapi_res_error};
   }
-});
+})
+;
 
 let app = new koa();
 
