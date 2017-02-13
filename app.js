@@ -7,8 +7,7 @@ import {bindUser, printPaper} from "./api";
 import uuid from "uuid/v4";
 import moment from "moment";
 import Gm from "gm";
-import Jimp from "jimp";
-import {encode} from 'node-base64-image';
+import request from 'request';
 
 let gm = Gm.subClass({imageMagick: true});
 let userID = '';
@@ -23,39 +22,33 @@ router.post('/slack', async(ctx, next) => {
   if (ctx.request.body.trigger_word == 'gu-_-pic') {
     let url = ctx.request.body.text.replace('gu-_-pic', '');
     console.log(url);
-    Jimp.read(url)
-      .then(function (image) {
-        image.resize(300, Jimp.AUTO);
-        image.invert();
-        // image.greyscale();
-        // image.flip(false, true)
-        image.getBuffer(Jimp.AUTO, function (err, buffer) {
-          gm(buffer)
-            .compress('None')
-            .monochrome()
-            .write('./temp.bmp', function (err) {
-              encode('./temp.bmp', {
-                  string: true, local: true
-                },
-                function (err, respon) {
-                  // console.log(respon);
-                  printPaper(config.ak, getNowTime(), respon, 'P', config.deviceId, userID).then(res => {
-                    console.dir(res);
-                  });
-                }
-              )
+    gm(request(url))
+      .resize(300)
+      .noProfile()
+      .flip()
+      .negative()
+      .monochrome()
+      .stream('bmp', (err, stdout, stderr) => {
+          if (err) {
+            console.log('failed');
+            console.dir(err);
+            return;
+          }
+          let bufs = [];
+          stdout.on('data', function (d) {
+            bufs.push(d);
+          });
+          stdout.on('end', function () {
+            let buffer = Buffer.concat(bufs);
+            console.dir(buffer.toString('base64'));
+            printPaper(config.ak, getNowTime(), buffer.toString('base64'), 'P', config.deviceId, userID).then(res => {
+              console.dir(res);
             });
-          // .toBuffer('bmp', function (err, bf) {
-          // printPaper(config.ak, getNowTime(), bf.toString('base64'), 'P', config.deviceId, userID).then(res => {
-          //   console.dir(res);
-          // });
-          // });
-        });
-      });
-
+          })
+        }
+      );
     ctx.body = {'text': 'print result: sent'};
-  }
-  else {
+  } else {
     let result = await
       printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
     ctx.body = {'text': 'print result: ' + result.showapi_res_error};
