@@ -38,10 +38,10 @@ router.post('/slack', async(ctx, next) => {
                   string: true, local: true
                 },
                 function (err, respon) {
-                  console.log(respon);
-                  // printPaper(config.ak, getNowTime(), respon, 'P', config.deviceId, userID).then(res => {
-                  //   console.dir(res);
-                  // });
+                  // console.log(respon);
+                  printPaper(config.ak, getNowTime(), respon, 'P', config.deviceId, userID).then(res => {
+                    console.dir(res);
+                  });
                 }
               )
             });
