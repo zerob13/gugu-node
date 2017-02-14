@@ -7,7 +7,7 @@ import {bindUser, printPaper} from "./api";
 import uuid from "uuid/v4";
 import moment from "moment";
 import Gm from "gm";
-import request from 'request';
+import request from "request";
 
 let gm = Gm.subClass({imageMagick: true});
 let userID = '';
@@ -23,38 +23,27 @@ router.post('/slack', async(ctx, next) => {
     let url = ctx.request.body.text.replace('gu-_-pic', '');
     console.log(url);
     gm(request(url))
+      .setFormat('BMP')
       .resize(300)
-      .noProfile()
       .flip()
-      .negative()
       .monochrome()
-      .stream('bmp', (err, stdout, stderr) => {
-          if (err) {
-            console.log('failed');
-            console.dir(err);
-            return;
-          }
-          let bufs = [];
-          stdout.on('data', function (d) {
-            bufs.push(d);
-          });
-          stdout.on('end', function () {
-            let buffer = Buffer.concat(bufs);
-            console.dir(buffer.toString('base64'));
-            printPaper(config.ak, getNowTime(), buffer.toString('base64'), 'P', config.deviceId, userID).then(res => {
-              console.dir(res);
-            });
-          })
+      .toBuffer('BMP', (err, buffer) => {
+        if (err) {
+          console.log('failed');
+          console.dir(err);
+          return;
         }
-      );
+        console.dir(buffer.toString('base64'));
+        printPaper(config.ak, getNowTime(), buffer.toString('base64'), 'P', config.deviceId, userID).then(res => {
+          console.dir(res);
+        });
+      });
     ctx.body = {'text': 'print result: sent'};
   } else {
-    let result = await
-      printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
+    let result = await printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
     ctx.body = {'text': 'print result: ' + result.showapi_res_error};
   }
-})
-;
+});
 
 let app = new koa();
 
