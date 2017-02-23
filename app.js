@@ -16,13 +16,14 @@ function getNowTime() {
   return moment().format('YYYY-MM-DD HH:mm:ss');
 }
 function checkToken(token) {
-  console.log(token);
+  let res = false
   config.tokens.forEach((item) => {
-    if (token === item) {
-      return true;
+    if (token == item) {
+      res = true;
+      return;
     }
   });
-  return false;
+  return res;
 }
 router.post('/slack', async(ctx, next) => {
   await next();
