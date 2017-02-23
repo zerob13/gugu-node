@@ -15,9 +15,20 @@ let router = new Router();
 function getNowTime() {
   return moment().format('YYYY-MM-DD HH:mm:ss');
 }
+function checkToken(token) {
+  config.tokens.forEach((item) => {
+    if (token === item) {
+      return true;
+    }
+  });
+  return false;
+}
 router.post('/slack', async(ctx, next) => {
   await next();
-  console.dir(ctx.request.body);
+  if (!checkToken(ctx.request.body.token)) {
+    ctx.body = {'text': 'you are not allowd to use this server'};
+    return;
+  }
   let content = ctx.request.body.user_name + ' says: ' + ctx.request.body.text;
   if (ctx.request.body.trigger_word == 'gu-_-pic') {
     let url = ctx.request.body.text.replace('gu-_-pic', '');
@@ -43,6 +54,16 @@ router.post('/slack', async(ctx, next) => {
     let result = await printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
     ctx.body = {'text': 'print result: ' + result.showapi_res_error};
   }
+});
+
+router.post('/text', async(ctx, next) => {
+  if (!checkToken(ctx.request.body.token)) {
+    ctx.body = {'text': 'you are not allowd to use this server'};
+    return;
+  }
+  let content = ctx.request.body.text;
+  let result = await printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
+  ctx.body = {'text': 'print result: ' + result.showapi_res_error};
 });
 
 let app = new koa();
