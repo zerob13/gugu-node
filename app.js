@@ -16,6 +16,7 @@ function getNowTime() {
   return moment().format('YYYY-MM-DD HH:mm:ss');
 }
 function checkToken(token) {
+  console.log(token);
   config.tokens.forEach((item) => {
     if (token === item) {
       return true;
