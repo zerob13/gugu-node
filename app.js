@@ -51,12 +51,17 @@ router.post('/slack', async(ctx, next) => {
           console.dir(res);
         });
       });
-    ctx.body = {'text': 'print result: sent'};
+    if (!ctx.request.params.noreply) {
+      ctx.body = {'text': 'print result: sent'};
+    }
   } else {
     let result = await printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
-    ctx.body = {'text': 'print result: ' + result.showapi_res_error};
+    if (!ctx.request.params.noreply) {
+      ctx.body = {'text': 'print result: ' + result.showapi_res_error};
+    }
   }
 });
+
 
 router.post('/text', async(ctx, next) => {
   if (!checkToken(ctx.request.body.token)) {
