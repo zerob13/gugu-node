@@ -28,7 +28,9 @@ function checkToken(token) {
 router.post('/slack', async(ctx, next) => {
   await next();
   if (!checkToken(ctx.request.body.token)) {
-    ctx.body = {'text': 'you are not allowd to use this server'};
+    if (!ctx.request.params.noreply) {
+      ctx.body = {'text': 'you are not allowd to use this server'};
+    }
     return;
   }
   let content = ctx.request.body.user_name + ' says: ' + ctx.request.body.text;
