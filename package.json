@@ -11,7 +11,6 @@
   "dependencies": {
     "gm": "^1.23.0",
     "iconv-lite": "^0.4.15",
-    "jimp": "^0.2.27",
     "koa": "^2.0.0",
     "koa-bodyparser": "^3.2.0",
     "koa-convert": "^1.2.0",
@@ -20,6 +19,7 @@
     "moment": "^2.17.1",
     "node-base64-image": "^1.0.3",
     "node-fetch": "^1.6.3",
+    "request": "^2.80.0",
     "uuid": "^3.0.1"
   },
   "devDependencies": {

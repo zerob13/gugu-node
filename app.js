@@ -6,10 +6,9 @@ import config from "./config";
 import {bindUser, printPaper} from "./api";
 import uuid from "uuid/v4";
 import moment from "moment";
-import Gm from "gm";
+import gm from "gm";
 import request from "request";
 
-let gm = Gm.subClass({imageMagick: true});
 let userID = '';
 let router = new Router();
 function getNowTime() {
@@ -28,7 +27,7 @@ function checkToken(token) {
 router.post('/slack', async(ctx, next) => {
   await next();
   if (!checkToken(ctx.request.body.token)) {
-    if (!ctx.request.params.noreply) {
+    if (!ctx.request.params || !ctx.request.params.noreply) {
       ctx.body = {'text': 'you are not allowd to use this server'};
     }
     return;
@@ -38,27 +37,28 @@ router.post('/slack', async(ctx, next) => {
     let url = ctx.request.body.text.replace('gu-_-pic', '');
     console.log(url);
     gm(request(url))
-      .setFormat('BMP')
-      .resize(300)
+      .resize(384)
+      .modulate(130, 20, 100)
+      .trim()
       .flip()
-      .monochrome()
-      .toBuffer('BMP', (err, buffer) => {
+      .type('Grayscale')
+      .colors(2)
+      .toBuffer('bmp', (err, buffer) => {
         if (err) {
           console.log('failed');
           console.dir(err);
           return;
         }
-        console.dir(buffer.toString('base64'));
         printPaper(config.ak, getNowTime(), buffer.toString('base64'), 'P', config.deviceId, userID).then(res => {
           console.dir(res);
         });
       });
-    if (!ctx.request.params.noreply) {
+    if (!ctx.request.params || !ctx.request.params.noreply) {
       ctx.body = {'text': 'print result: sent'};
     }
   } else {
     let result = await printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
-    if (!ctx.request.params.noreply) {
+    if (!ctx.request.params || !ctx.request.params.noreply) {
       ctx.body = {'text': 'print result: ' + result.showapi_res_error};
     }
   }
