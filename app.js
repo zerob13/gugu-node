@@ -36,6 +36,9 @@ router.post('/slack', async(ctx, next) => {
   if (ctx.request.body.trigger_word == 'gu-_-pic') {
     let url = ctx.request.body.text.replace('gu-_-pic', '');
     console.dir(ctx.request.body);
+    if (url.startsWith('<')) {
+      url = url.slice(1, url.length - 1);
+    }
     gm(request(url))
       .resize(384)
       .modulate(130, 20, 100)
