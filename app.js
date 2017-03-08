@@ -75,7 +75,7 @@ router.post('/text', async(ctx, next) => {
   }
   let content = ctx.request.body.text;
   let result = await printPaper(config.ak, getNowTime(), content, 'T', config.deviceId, userID);
-  ctx.body = {'text': 'print result: ' + result.showapi_res_error};
+  console.dir({'text': 'print result: ' + result.showapi_res_error});
 });
 
 let app = new koa();
