@@ -35,7 +35,7 @@ router.post('/slack', async(ctx, next) => {
   let content = ctx.request.body.user_name + ' says: ' + ctx.request.body.text;
   if (ctx.request.body.trigger_word == 'gu-_-pic') {
     let url = ctx.request.body.text.replace('gu-_-pic', '');
-    console.log(url);
+    console.dir(ctx.request.body);
     gm(request(url))
       .resize(384)
       .modulate(130, 20, 100)
